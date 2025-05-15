@@ -1,0 +1,246 @@
+/// @file [pa18.cpp]
+/// @author [Luca Williams]
+/// @date [4/30/2025]
+///
+/// @note I pledge my word of honor tha tI have adbided by the
+/// CSN Academic  Integrity Policy while completing this assignment.
+///
+/// @brief A C++ file that runs a simulation of a car wash based off of a time
+/// passed to the Time argument. For instance, a Time value of 30000 runs a
+/// simulation of 30000 minutes.
+///
+/// @note The program was very simple so I decided not to over complicate it
+/// with OOP.
+#include <iostream>
+#include <queue>
+#include <random>
+#include <chrono>
+#include <string>
+#include <iomanip>
+#include <cctype>
+using namespace std;
+
+/***
+ * @brief Validates the input from the cmdl
+ * @var ARGC- Argument count
+ * @var ARGV - The memory address for the arguments
+ * @return - Depending on the arguments passed either;
+ * returns -1 for invalid state
+ *          0 for helper function passed
+ *          Minute_arg for the minutes.
+ * @note Returning 0 simply ignores all of the other arguments and focuse on -h
+ ***/
+int CheckInput(int& ARGC, char* ARGV[]);
+
+
+/***
+ * @brief generates random number
+ * @var Num the range of numbers
+ * @return Returns a string of what exactly occurred.
+ ***/
+string Generate_RanNum();
+
+/**
+ * @brief Processes the input from a templated function
+ * @var Function a const reference to the function that is ran with
+ * specified arguments
+ * @var Args - arguments to be passed to the function
+ **/
+template <class Func, class... Args>
+void Processinput(const Func& function, Args... args);
+/**
+ *@brief Starts the carwash process and takes the time to run as an argument
+ *@var Time - The time as a float with decimal accuracy to for simulated time.
+ **/
+void StartCarWash(float Time);
+
+int main(int argc, char* argv[]) {
+
+
+
+    using namespace std::chrono;
+
+    float Max_Duration = 0;
+
+    if ((CheckInput(argc, argv) != 0) && (CheckInput(argc, argv) != -1)) {
+        Max_Duration = static_cast<float>(CheckInput(argc, argv));
+    }
+
+    Processinput(CheckInput, argc, argv);
+    StartCarWash(Max_Duration);
+
+
+
+    return 0;
+}
+/**
+ *@brief Starts the carwash process and takes the time to run as an argument
+ *@var Time - The time as a float with decimal accuracy to for simulated time.
+ **/
+void StartCarWash(float Time) {
+    float Max_Duration = Time;
+
+    const string Table =
+        " Time (minutes)    Cars Washed   Average Wait   Longest Wait";
+    const string line(60, '-');
+    cout << Table << endl
+         << line << endl;
+    std::queue<int> q;
+    float Default_time = 30;
+
+    while (Max_Duration >= Default_time
+           && Max_Duration > 0) { //  Loops from 30 -> 60 -> ...
+            float car_amnt = 0;   //  Amount of cars
+        size_t Longest_wait = 0;  //  How long a car waited before being pop
+
+        if (Default_time == Max_Duration) {
+            Max_Duration = -1;
+        }
+
+        for (size_t z = 0; z < q.size(); ++z) {
+            q.pop();
+        }
+
+        car_amnt = 0;
+        using namespace std::chrono;
+
+
+
+        for (float x = 0; x < Default_time; x++) {
+            const auto Num = Generate_RanNum();
+
+            if (Num == "one car") {
+                q.push(1);
+                car_amnt++;
+
+            }
+
+            if (Num == "two cars") {
+
+                q.push(1);
+                q.push(1);
+                car_amnt++;
+                car_amnt++;
+
+            }
+
+            if (Num == "no cars") {
+
+                // Safe... for now
+            }
+
+            if (q.size() > 0) {
+
+                q.pop();
+            }
+
+            if (Longest_wait < q.size()) {
+                Longest_wait = q.size();
+            }
+        }
+
+        float average_wait = static_cast<float>(Default_time / car_amnt);
+
+        cout  << std::fixed << right << setw(15) << static_cast<int>
+              (Default_time) << setw(15) << static_cast<int>(car_amnt) << setw(
+                  15) << Longest_wait << setw(15) << std::fixed << setprecision(
+                  2) << average_wait << endl;
+
+        if ((Default_time + Default_time) >= Max_Duration) {
+            Default_time = Max_Duration;
+
+        } else {
+            Default_time = Default_time + Default_time;
+        }
+
+        //-------------------------------------
+    }
+}
+/***
+ * @brief Validates the input from the cmdl
+ * @var ARGC- Argument count
+ * @var ARGV - The memory address for the arguments
+ * @return - Depending on the arguments passed either;
+ * returns -1 for invalid state
+ *          0 for helper function passed
+ *          Minute_arg for the minutes.
+ * @note Returning 0 simply ignores all of the other arguments and focuse on -h
+ ***/
+int CheckInput(int& ARGC, char* ARGV[]) {
+    int EXIT_STATE = -1;
+        const int Default_Time = 43200;  //  Default time to simulate
+        const int Help_state = 0;  //  Produces the help output
+        const int Bad_state = -1;  //  Shuts the application down.
+    if (ARGC == 1) {
+        EXIT_STATE = Default_Time;  // Default
+    } else if (ARGC == 2) {
+        EXIT_STATE = Help_state;
+    } else {
+        for (int x = 0; x < ARGC; ++x) {
+            string arg = ARGV[x];
+
+            if (arg == "-h" || arg == "-H") {
+                EXIT_STATE = Help_state;
+
+            }
+
+            if ((arg == "-m" || arg == "-M")) {
+                const string Minute_arg = ARGV[x + 1];
+
+                try {
+                    EXIT_STATE = std::stoi(Minute_arg);
+                } catch (const std::out_of_range& ex) {
+                    std::cerr << "Error: Number of of range\n";
+                    EXIT_STATE = Bad_state;
+                } catch (const std::logic_error& what()) {
+                    std::cerr << "Please input a range\n";
+                    EXIT_STATE = Bad_state;
+                }
+
+            }
+        }
+    }
+
+    return EXIT_STATE;
+}
+/**
+ * @brief Processes the input from a templated function
+ * @var Function a const reference to the function that is ran with
+ * specified arguments
+ * @var Args - arguments to be passed to the function
+ **/
+template <class Func, class... Args>
+void Processinput(const Func& function, Args... args) {
+    if (function(args...) == 0) {
+        cout << "Usage: ./pa18 [-m MINUTES] [-h]" << endl
+             << "Simulate a car wash queue. " << endl
+         << "  -m MINUTES  Set simulation upper limit (default 43200)" << endl
+             << "  -h          Show this help message and exit" << endl;
+    }
+}
+/***
+ * @brief generates random number
+ * @var Num the range of numbers
+ * @return Returns a string of what exactly occurred.
+ ***/
+string Generate_RanNum() {
+    string Return_status;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int64_t> dist(1, 4);  //  range 1 to 4
+   const auto resultant = dist(gen);
+
+    if (resultant == 1) {
+        Return_status = "one car";  //  25% chance for addition of 1 car
+    }
+
+    if (resultant == 2) {
+        Return_status = "two cars";  //  25% chance for addition of 2 cars
+    }
+
+    if (resultant > 2) {
+        Return_status = "no cars";  //  50% chance for nada.
+    }
+
+    return Return_status;
+}
