@@ -1,0 +1,157 @@
+/// @author Luca Williams
+/// @date 4/2/2025
+/// @brief Code takes a maze of 0's and 1's from input stream
+/// then solves the maze with a recursive function, and then
+/// outputs the solved maze from an overridden output stream operator
+///
+/// @note I pledge my word of honor tha tI have adbided by the
+/// CSN Academic  Integrity Policy while completing this assignment.
+///
+
+///
+
+#include <iostream>
+#include <vector>
+#include <cstring>
+#include <string>
+#include <cassert>
+
+using namespace std;
+/**
+ * @brief Recursive function that solve a maze of 0's & 1's with the entry
+ * of the maze being (0,1) and the exit always being at the last row, and 2nd
+ * to last column.
+ * @param maze The vector we grab elements from, elements are stored
+ * as: "10111"
+ *     "10001" etc
+ * @param row The Y value
+ * @param col The X value
+ *
+ **/
+bool solve_maze(vector<string>& maze, int row, int col);
+/***
+ *  @brief Output stream override for a maze vector.
+ *  @param Output_s The output stream variable that takes the input from
+ *  the vector.
+ *  @param rhs The formatted vector that is the output
+ *  @return returns the instance of the vector based off iterative solution
+ **/
+ostream& operator<< (ostream& Output_s, const vector<string>& rhs);
+
+//           --------------Main Function------------------
+
+int main() {
+    string buffer;           //  The variable that inputs into vector of chars
+    vector<string> mze_vector(0);           // The vector that stores the maze
+    int Mze_cnt;                                      //   The amount of mazes
+
+    cin >> Mze_cnt;
+
+    cin.putback(static_cast<char>(Mze_cnt));
+
+    for (int x = 1; x <= Mze_cnt; x++) {
+        if (x > 1) {
+            cout << endl;   //  For formatting
+        }
+
+        cout << "Maze " << x << ":";
+
+        do {
+            mze_vector.push_back(buffer);
+
+        } while (getline(cin, buffer) &&  !buffer.empty());
+
+        //  Cut off the first entry for formatting requirements
+        if (buffer.empty()) {
+            mze_vector.erase(mze_vector.begin());
+        }
+
+        //  Cut off the first entry for formatting requirements
+        if (x == 1) {
+            mze_vector.erase(mze_vector.begin());
+        }
+
+        //  Catches the O.O.R. error that a maze with no solution
+        //  outputs.
+        try {
+            solve_maze(mze_vector, 0, 1);
+            cout <<  endl << mze_vector;
+        } catch (const std::out_of_range& e) {
+            cout << endl << "error 1: No solution found for the maze"
+                 <<  endl;
+        }
+
+        mze_vector.clear();  //  Resets vector
+
+    }
+
+    return 0;
+}
+/***
+ *  @brief Output stream override for a maze vector.
+ *  @param Output_s The output stream variable that takes the input from
+ *  the vector.
+ *  @param rhs The formatted vector that is the output
+ *  @return returns the instance of the vector based off iterative solution
+ **/
+ostream& operator<< (ostream& Output_s, const vector<string>& rhs) {
+    for (size_t instance = 0; instance < rhs.size(); instance++) {
+        Output_s << rhs.at(instance) << endl;
+    }
+
+    return Output_s;
+}
+/**
+ * @brief Recursive function that solve a maze of 0's & 1's with the entry
+ * of the maze being (0,1) and the exit always being at the last row, and 2nd
+ * to last column.
+ * @param maze The vector we grab elements from, elements are stored
+ * as: "10111"
+ *     "10001" etc
+ * @param row The Y value
+ * @param col The X value
+ *
+ **/
+bool solve_maze(vector<string>& maze, int row, int col) {
+
+
+    // Firsts at function is the row, second at() is the column.
+    // Base Case -- Checks if the arguments are equal to the maze's exit.
+    if ((row + 1 == static_cast<int>(maze.size()))
+        && (col == static_cast<int>(maze[maze.size() - 1].length() - 2))) {
+        if (maze.at(0).at(1) == '0') {
+            maze.at(0).at(1) = '9';
+        }
+
+        maze[row][col] = '9';  // Breadcrumbs
+        return true;
+    }
+
+    if (maze.at(row + 1).at(col) == '0') {
+                                          // If valid path, then attempt move
+        maze.at(row + 1).at(col) = '9';      // Breadcrumbs/Trail left behind
+        //             --Recursive function calls--
+
+        if (solve_maze(maze, row, col + 1)) {
+            return true;    //  move right
+        }
+
+        if (solve_maze(maze, row + 1, col)) {
+            return true;    //  move down
+        }
+
+        if (solve_maze(maze, row, col - 1)) {
+            return true;    //  move left
+        }
+
+        if (solve_maze(maze, row - 1, col)) {
+            return true;    //  move up
+        }
+
+        maze.at(row + 1).at(col) = '0';  // If none of the moves are valid,
+        // backtrack
+
+    }
+
+    return false;
+}
