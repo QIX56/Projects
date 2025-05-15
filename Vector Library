@@ -1,0 +1,760 @@
+/// @file [Vector.cpp]
+/// @author [Luca Williams]
+/// @date [2/19/2025]
+/// 
+/// @note I pledge my word of honor tha tI have adbided by the
+/// CSN Academic  Integrity Policy while completing this assignment.
+///
+/// @note This is the implementation class of the Vector class
+/// @brief Implementation file for the Vector class
+///
+
+#include <cassert>
+#include <cstddef>
+#include <initializer_list>
+#include <iostream>
+#ifndef VECTOR3_HPP
+#define VECTOR3_HPP
+  // Type Aliases
+
+
+template <class T>
+class Vector {
+public:
+    using value_type      = T;
+    using size_type       = size_t;
+    using reference       = value_type&;
+    using const_reference = const value_type&;
+    using pointer         = value_type*;
+    using const_pointer   = const value_type*;
+    // Constructors and Destructor
+    /**
+     *  @brief Constructs the container with count copies of elements.
+     *  @param count The number of elements to create in the vector
+     *  (defaults to zero).
+     *
+     *  Note: When constructed with a count, the vector's size and capacityare
+     *  both set to count, and each element is default-constructed.
+     */
+    explicit Vector(size_type count = 0);
+
+    /**
+     *  @brief Copy constructor.
+     *  @param other The Vector object to copy.
+     */
+    Vector(const Vector& other);
+    /**
+    *  @brief Copy constructor
+    */
+    Vector(Vector&& other);
+    /**
+     * @brief Constructs the vector using an init list.
+     * @param ilist An init list containing elements for the vector.
+     */
+    explicit Vector(const std::initializer_list<value_type>& ilist);
+    /**
+     *  @brief Virtual destructor.
+     */
+    virtual ~Vector();
+
+    // Element Access
+
+    /**
+     *  @brief Returns a reference to the element at the specified position.
+     *  @param pos The position of the element.
+     *  @return A reference to the element at position pos.
+     *  @pre pos must be less than size().
+     */
+    reference at(size_type pos);
+    const_reference at(size_type pos) const;
+
+    /**
+     *  @brief Returns a reference to the first element.
+     *  @return A reference to the first element.
+     *  @pre The vector must not be empty.
+     */
+    reference front();
+    const_reference front() const;
+
+    /**
+     *  @brief Returns a reference to the last element.
+     *  @return A reference to the last element.
+     *  @pre The vector must not be empty.
+     */
+    reference back();
+    const_reference back() const;
+
+    // Iterators
+
+    /**
+     *  @brief Returns a pointer to the first element.
+     *  @return A pointer to the first element.
+     */
+    iterator begin(){return iterator(m_data + m_count);
+    const_pointer begin() const;
+
+    /**
+     *  @brief Returns a pointer to one past the last valid element.
+     *  @return A pointer to one past the last valid element.
+     */
+    iterator end();
+    const_pointer end() const;
+
+    // Capacity
+
+    /**
+     *  @brief Checks whether the vector is empty.
+     *  @return True if the vector is empty; otherwise, false.
+     */
+   bool empty() const;
+
+    /**
+     *  @brief Returns the number of valid elements in the vector.
+     *  @return The number of valid elements.
+     */
+    size_type size() const;
+
+    /**
+     *  @brief Returns the capacity of the vector.
+     *  @return The capacity of the vector.
+     */
+    size_type capacity() const;
+
+    // Modifiers
+
+    /**
+     *  @brief Clears the vector.
+     *  Sets the size (m_count) to 0 without deallocating the memory.
+     */
+    void clear();
+
+    /**
+     *  @brief Adds an element to the end of the vector.
+     *  If the vector's size equals its capacity, a new dynamic array with
+     *  double the current capacity is allocated, the existing elements are
+     *  copied using pointer-based iteration, the old memory is deallocated,
+     *  and then the element is added.
+     *  @param value The value to add.
+     */
+   void push_back(const value_type& value);
+
+    /**
+     *  @brief Removes the last element of the vector.
+     *  @pre The vector must not be empty.
+     */
+   void pop_back();
+
+    // Inserts a value at the specified position in the vector.
+    // It shifts the existing
+// elements to make space for the new value, adjusting the vector's size
+// if necessary.
+// Returns an iterator (pointer) to the position where the value was inserted.
+
+pointer insert(pointer pos, const_reference value);
+
+// Erases the element at the specified position in the vector.
+// It shifts the remaining
+// elements to fill the gap left by the removed element,
+// adjusting the vector's size.
+// Returns an iterator (pointer) to the element following the one that was
+// erased.
+
+pointer erase(pointer pos);
+
+
+    // =======================================================================
+
+  // Copy assignment operator:
+  // Assigns the contents of another Vector to this Vector.
+// If the current object is not the same as the other object, it deallocates
+// the existing data, allocates new memory, and copies the elements from the
+// other vector into this one.
+
+Vector& operator=(const Vector& other);
+
+// Move assignment operator: Transfers the resources of a temporary (rvalue)
+// Vector to this Vector, without copying the elements. It releases the
+// current resources and takes ownership of the other vector's data.
+
+Vector& operator=(Vector&& other) noexcept;
+
+// Subscript operator: Provides non-const access to an element at a given
+// index in the vector. This operator allows modification of the element.
+
+reference operator[](size_type index);
+
+// Const subscript operator:
+// Provides read-only access to an element at a given
+// index in the vector.
+// This operator does not allow modification of the element.
+
+const_reference operator[](size_type index) const;
+
+// Addition assignment operator: Concatenates another Vector to this Vector.
+// It appends all elements of the other vector to the current vector,
+// adjusting
+// its size and capacity if necessary.
+
+Vector& operator+=(const Vector& other);
+
+
+private:
+    size_type m_count;     ///< Number of valid elements.
+    size_type m_capacity;  ///< Allocated capacity of the vector.
+    pointer   m_data;      ///< Pointer to the dynamic array.
+};  // class Vector
+
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+// Compares two vectors for equality. Returns true if the two vectors have the
+// same size
+// and identical elements in the same order, false otherwise.
+template<class T>
+bool equal(const Vector<T>& lhs, const Vector<T>& rhs);
+
+// Compares two vectors for equality using the equality operator.
+// Returns true if the
+// two vectors are equal (same size and same elements in the same order),
+// false otherwise.
+template<class T>
+bool operator==(const Vector<T>& lhs, const Vector<T>& rhs);
+
+// Concatenates two vectors and returns a new vector
+// containing all elements of the
+// left-hand side vector followed by all elements of the right-hand
+// side vector.
+template<class T>
+Vector<T> operator+(const Vector<T>& lhs, const Vector<T>& rhs);
+
+
+
+/**
+     *  @brief Constructs the container with count copies of elements.
+     *  @param count The number of elements to create in the vector
+     *  (defaults to zero).
+     *
+     *  Note: When constructed with a count, the vector's size and capacityare
+     *  both set to count, and each element is default-constructed
+     */
+template <class T>
+Vector<T>::Vector (size_type count)
+ :m_count(count), m_capacity(count), m_data(new value_type[count]) {
+    pointer dest = m_data;
+    const_pointer vfv = m_data + m_count;
+    while(dest != vfv){
+        *dest++ = T{};
+    }
+}
+ /**
+     *  @brief Copy constructor.
+     *  @param other The Vector object to copy.
+     */
+template <class T>
+Vector<T>::Vector(const Vector<T>& other)
+    :m_count(other.size()),
+    m_capacity(other.capacity()),
+    m_data(new value_type[other.capacity()] {}){
+
+    const_pointer pp = other.begin();
+
+    pointer dest = m_data;
+
+   while(pp != other.end() ){
+
+        *dest = *pp;
+        dest++;
+        pp++;
+       }
+
+    }
+template <class T>
+Vector<T>::Vector(Vector<T>&& other):
+    m_count(other.m_count),
+    m_capacity(other.m_capacity),
+    m_data(other.m_data){
+
+    other.m_count=0;
+    other.m_capacity =0;
+    other.m_data = nullptr;
+    }
+
+    /**
+     * @brief Constructs the vector using an init list.
+     * @param ilist An init list containing elements for the vector.
+     */
+template <class T>
+Vector<T>::Vector(const std::initializer_list<T>& ilist):
+m_count(ilist.size()), m_capacity(ilist.size()),
+    m_data(new value_type[ilist.size()]){
+    pointer dest = m_data;
+    const_pointer vfv = ilist.begin();
+    for(size_type i = 0; i < ilist.size(); i++){
+        *dest = *vfv;
+        dest++;
+        vfv++;
+        }
+
+}
+/**
+     *  @brief Virtual destructor.
+     */
+template <class T>
+Vector<T>::~Vector()
+    {
+        delete[] m_data;
+        m_data = nullptr;
+        m_capacity = 0;
+        m_count = 0;
+
+    }
+// Element Access
+// Return a reference to the element at position pos (using pointer-based
+// iteration internally).
+ /**
+     *  @brief Returns a reference to the element at the specified position.
+     *  @param pos The position of the element.
+     *  @return A reference to the element at position pos.
+     *  @pre pos must be less than size().
+     */
+template <class T>
+typename Vector<T>::reference Vector<T>::at(size_type pos){
+    assert(pos < size());
+
+    return *(m_data+ pos);
+    }
+     /**
+     *  @brief Returns a reference to the element at the specified position.
+     *  @param pos The position of the element.
+     *  @return A reference to the element at position pos.
+     *  @pre pos must be less than size().
+     */
+template <class T>
+typename Vector<T>::const_reference Vector<T>::at(size_type pos) const{
+    assert(pos < size());
+
+    return *(m_data +pos);
+    }
+
+/**
+     *  @brief Returns a reference to the first element.
+     *  @return A reference to the first element.
+     *  @pre The vector must not be empty.
+     */
+template <class T>
+typename Vector<T>::reference Vector<T>::front(){
+    assert(m_count > 0);
+    return *(m_data);
+    }
+    /**
+     *  @brief Returns a reference to the first element.
+     *  @return A reference to the first element.
+     *  @pre The vector must not be empty.
+     */
+template <class T>
+typename Vector<T>::const_reference Vector<T>::front() const{
+    assert(m_count > 0);
+    return *(m_data);
+    }
+
+/**
+     *  @brief Returns a reference to the last element.
+     *  @return A reference to the last element.
+     *  @pre The vector must not be empty.
+     */
+template <class T>
+typename Vector<T>::reference Vector<T>::back(){
+    assert(m_count > 0);
+    return *(m_data + (m_count - 1));
+
+    }
+/**
+     *  @brief Returns a reference to the last element.
+     *  @return A reference to the last element.
+     *  @pre The vector must not be empty.
+     */
+template <class T>
+typename Vector<T>::const_reference Vector<T>::back() const{
+    assert(m_count > 0);
+    return *(m_data + (m_count - 1));
+    }
+
+ /**
+     *  @brief Returns a pointer to the first element.
+     *  @return A pointer to the first element.
+     */
+template <class T>
+typename Vector<T>::iterator Vector<T>::begin(){
+    return iterator(m_data);
+    }
+ /**
+     *  @brief Returns a pointer to the first element.
+     *  @return A pointer to the first element.
+     */
+template <class T>
+typename Vector<T>::const_pointer Vector<T>::begin() const{
+    return (m_data);
+    }
+
+/**
+     *  @brief Returns a pointer to one past the last valid element.
+     *  @return A pointer to one past the last valid element.
+     */
+template <class T>
+ Vector<T>::iterator Vector<T>::end(){
+    return iterator(m_data + m_count);
+    }
+/**
+     *  @brief Returns a pointer to one past the last valid element.
+     *  @return A pointer to one past the last valid element.
+     */
+template <class T>
+typename Vector<T>::const_pointer Vector<T>::end() const{
+    return (m_data + m_count );
+    }
+
+
+//    Capacity Functions
+/**
+     *  @brief Checks whether the vector is empty.
+     *  @return True if the vector is empty; otherwise, false.
+     */
+template <class T>
+bool Vector<T>::empty() const{
+    if(m_count == 0){
+        return true;}
+        else{return false;}
+    }
+/**
+     *  @brief Returns the number of valid elements in the vector.
+     *  @return The number of valid elements.
+     */
+template <class T>
+typename Vector<T>::size_type Vector<T>::size() const{
+    return m_count;
+    }
+ /**
+     *  @brief Returns the capacity of the vector.
+     *  @return The capacity of the vector.
+     */
+template <class T>
+typename Vector<T>::size_type Vector<T>::capacity() const{
+    return m_capacity;
+    }
+// Modifiers
+ /**
+     *  @brief Clears the vector.
+     *  Sets the size (m_count) to 0 without deallocating the memory.
+     */
+template <class T>
+void Vector<T>::clear(){
+    m_count = 0;
+    }
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false.
+ */
+ template <class T>
+T* Vector<T>::insert(pointer pos, const_reference value){
+    // Precondition
+    assert(begin() <= pos && pos <= end());
+    pointer insertion = nullptr;
+  if (m_count == m_capacity) {
+        size_type new_capacity;
+        if (m_capacity == 0) {new_capacity = 1;}
+        else {new_capacity = m_capacity * 2;}
+        // Dynamic pointer
+        value_type* newData = new value_type[new_capacity];
+        value_type* src = m_data;  // Pointer for private member
+        value_type* dest = newData; // Pointer for the new data
+       while(src != pos){
+            *dest = *src;
+            src++;
+            dest++;
+        }
+        insertion = dest;
+        *dest++ = value; // Pointer to original array
+        while(src != end()){
+            *dest = *src;
+            src++;
+            dest++;
+        }
+
+        delete[] m_data;
+        m_data = newData;
+        m_capacity = new_capacity;  // Sets capacity to new capacity
+    }else{
+        for (pointer p = end(); p != pos; --p){
+            *p = *(p - 1);
+            }
+            insertion = pos;
+            *pos = value;
+        }
+
+    m_count++;
+    return insertion;
+    }
+
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+template <class T>
+T* Vector<T>::erase(pointer pos){
+    assert(begin() <= pos && pos < end());
+
+  for(pointer p = pos; p != end() - 1; ++p){
+      *p = *(p + 1);
+      }
+    m_count--;
+    return pos;
+    }
+
+/**
+     *  @brief Adds an element to the end of the vector.
+     *  If the vector's size equals its capacity, a new dynamic array with
+     *  double the current capacity is allocated, the existing elements are
+     *  copied using pointer-based iteration, the old memory is deallocated,
+     *  and then the element is added.
+     *  @param value The value to add.
+     */
+ template <class T>
+void Vector<T>::push_back(const value_type& value) {
+
+    if (m_count == m_capacity) {
+        size_type new_capacity;
+        if (m_capacity == 0) {
+            new_capacity = 1;
+        }
+        else {
+            new_capacity = m_capacity * 2;
+        }
+        // Dynamic pointer
+        value_type* newData = new value_type[new_capacity];
+        value_type* oPointer = m_data;  // Pointer for private member
+        value_type* nPointer = newData; // Pointer for the new data
+        for (size_type i = 0; i < m_count; i++ ) {
+            *nPointer = *oPointer;
+            oPointer++;
+            nPointer++;
+        }
+        delete[] m_data;        // Deletes the old data
+        m_data = newData;       // Sets old to new
+        m_capacity = new_capacity;  // Sets capacity to new capacity
+    }
+    *(m_data + m_count) = value;
+    m_count++;
+}
+
+
+ /**
+     *  @brief Removes the last element of the vector.
+     *  @pre The vector must not be empty.
+     */
+template <class T>
+void Vector<T>::pop_back(){
+    assert(m_count > 0);
+    m_count--;
+
+    }
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+ template <class T>
+Vector<T>& Vector<T>::operator=(Vector<T>&& other) noexcept{
+    if(this != &other) { // Protect against self-assignment
+        //  Clean up existing resources
+        delete [] m_data;
+        // Transferowenershipofdata from 'other'
+       m_count = other.m_count;
+       m_capacity  = other.m_capacity;
+       m_data = other.m_data;
+       // Leave 'other' in a valid, empty state
+       other.m_count = 0;
+       other.m_capacity = 0;
+       other.m_data = nullptr;
+        }
+        return *this;
+    }
+
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+ template <class T>
+ Vector<T>& Vector<T>::operator=(const Vector<T>& other){
+
+     if (this != &other){
+        delete [] m_data;
+        m_capacity = other.capacity();
+        m_count = other.size();
+        m_data = new value_type[m_capacity];
+        value_type* dest = m_data;
+        const value_type* src = other.m_data;
+
+        while(src != other.m_data + other.m_count){
+            *dest++ = *src++;
+            }
+         }
+         return *this;
+     }
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+ template <class T>
+Vector<T>& Vector<T>::operator+=(const Vector<T>& other){
+
+  size_type new_size = m_count + other.m_count;
+  if(new_size > m_capacity){
+      size_type new_capacity = (m_capacity == 0) ? 1 : m_capacity;
+      while(new_capacity < new_size){
+          new_capacity *= 2;
+          }
+
+
+      pointer new_data = new value_type[new_capacity];
+
+      pointer src = m_data;
+      pointer dest = new_data;
+      while(src != end()){
+          *dest++  = *src++;
+          }
+          delete[]  m_data;
+          m_data = new_data;
+          m_capacity = new_capacity;
+    }
+      pointer src = other.m_data;
+      pointer dest = m_data + m_count;
+      while(src != other.end()){
+          *dest++ = *src++;
+        }
+
+    m_count = new_size;
+
+    return *this;
+
+          }
+
+
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+ template <class T>
+T& Vector<T>::operator[](size_type index){
+
+    return at(index);
+    }
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+ template <class T>
+const T& Vector<T>::operator[](size_type index) const{
+
+    return at(index);
+    }
+
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+ template <class T>
+bool operator==(const Vector<T>& lhs, const Vector<T>& rhs){
+    bool EXIT_STATE = true;
+    if(!equal(lhs, rhs)){
+        EXIT_STATE = false;
+        }
+    return EXIT_STATE;
+    }
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+template <class T>
+Vector<T> operator+(const Vector<T>& lhs, const Vector<T>& rhs){
+    Vector<T> Combined_vector(lhs.size() + rhs.size()); // New vector<
+    // Copies the elements of the older vector
+    // into the new vector
+    T* dest = Combined_vector.begin();
+    const T* right = rhs.begin();
+    const T* left = lhs.begin();
+
+    while(left != lhs.end()){
+        *dest++ = *left++;
+        }
+    while(right != rhs.end()){
+        *dest++ = *right++;
+        }
+    return Combined_vector;
+    }
+/**
+ *  @brief Non-member function to compare two vectors for equality.
+ *  @param lhs The left-hand side vector.
+ *  @param rhs The right-hand side vector.
+ *  @return True if the vectors are equal in size and content; otherwise false
+ */
+ template <class T>
+bool equal(const Vector<T>& lhs, const Vector<T>& rhs){
+    bool EXIT_STATE;
+    const T* RHS_pointer; // pointers for the argument
+    const T* LHS_pointer;  // pointer for the arugment
+    EXIT_STATE = true;
+    RHS_pointer = rhs.begin();
+    LHS_pointer = lhs.begin();
+    if (lhs.size() == rhs.size()){
+        EXIT_STATE = true;
+        }else{EXIT_STATE = false;}
+
+    for(size_t i = 0;i < rhs.size();i++){    // Iterative pointer loop
+        if(*RHS_pointer != *LHS_pointer){
+            EXIT_STATE = false ;
+        }
+        RHS_pointer++;
+            LHS_pointer++;
+    }
+return EXIT_STATE;
+}
+
+/**
+ *  @file Vector.h
+ *  @author
+ *  @date
+ *  @note I pledge my word of honor that I have complied with the
+ *  CSN Academic Integrity Policy while completing this assignment.
+ *  @brief This file declares the Vector class, which emulates the
+ *  behavior of std::vector. It supports dynamic memory management,
+ *  pointer-based iteration, and provides member functions for
+ *  element access, capacity queries, and modifications.
+ * @note I utilized ai to style my code. Chatgpt to be exact.
+ */
+
+
+
+
+
+
+#endif  // VECTOR3_HPP
