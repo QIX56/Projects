@@ -1,0 +1,595 @@
+/**
+*  @file LList.hpp
+*  @author Luca Williams
+*  @date 4/16/2025
+*  @note I pledge my word of honor that I have complied with the
+*  CSN Academic Integrity Policy while completing this assignment.
+*  @brief Its a list Header/implementation file
+*/
+
+#include <cstddef>
+#include <iterator>
+#include <initializer_list>
+#include <iterator>
+#include <stdexcept>
+#include <string>
+#ifndef LLIST1_HPP
+#define LLIST1_HPP
+using namespace std;
+template <class T>
+class LList {
+public:
+    /**
+     * @brief The node struct
+     * @return
+     */
+    struct Node {
+        T      data{};
+        Node*  prev{};
+        Node*  next{};
+        // Node constructor
+        Node(const T& value, Node* p = nullptr, Node* n = nullptr):
+            data(value), prev(p), next(n) {
+
+        }
+    };
+
+    class BiDirectionalIterator {
+    public:
+        using iterator_category =  std::bidirectional_iterator_tag;
+        using difference_type   = std:: ptrdiff_t;
+        using value_type        = T;
+        using pointer           = T*;
+        using reference         = T&;
+
+        // Constructors
+
+
+
+        friend class LList;
+        /**
+         * @brief Bidiredtional construtor
+         * @param ptr - iterator for the constuctor
+         * @param
+         * @param
+         * @return
+         */
+        BiDirectionalIterator(Node* ptr = nullptr):
+            current(ptr) {}
+        /**
+         * @brief Prefix increment
+         * @param
+         * @param
+         * @param
+         * @return returns incremented pointer to the calling object.
+         */
+        BiDirectionalIterator& operator++() {
+            if (current != nullptr) {
+                current = current->next;
+            }
+
+            return *this;
+        }
+        /**
+        * @brief Postfix Increment
+        * @param int - The object being incremented.
+        * @param
+        * @param
+        * @return Returns incremented pointer to the called object.
+        */
+        BiDirectionalIterator  operator++(int) {
+            BiDirectionalIterator temp = *this;
+            ++(*this);
+            return temp;
+        }
+        /**
+        * @brief Prefix Decrement
+        * @param
+        * @param
+        * @param
+        * @return Returns decremented pointer to the calling object
+        */
+        BiDirectionalIterator& operator--() {
+            if (current != nullptr) {
+                current = current->prev;
+            }
+
+            return *this;
+        }
+        /**
+        * @brief Postfix Decrement
+        * @param int - the objected being decremented
+        * @param
+        * @param
+        * @return Returns decremented pointer to the calling object
+        */
+        BiDirectionalIterator  operator--(int) {
+            BiDirectionalIterator temp = *this;
+            --(*this);
+            return temp;
+        }
+        /**
+         * @brief Dereference Operator
+         * @param
+         * @param
+         * @param
+         * @return Returns the data stored in the "current" node.
+         */
+        reference operator*() const {
+            return current->data;
+        }
+        /**
+        * @brief Member Access Operator
+        * @param
+        * @param
+        * @param
+        * @return Returns direct access to the current node's members
+        */
+        T* operator->() const {
+            return current;
+        }
+        /**
+         * @brief Equality Comparison
+         * @param rhs - an object of BiDirectional class
+         * @param
+         * @param
+         * @return Returns if equal or not
+         */
+        bool operator==(const BiDirectionalIterator& rhs) const {
+            return current == rhs.current;
+        }
+        /**
+        * @brief inEquality Comparison
+        * @param rhs - an object of BiDirectional class
+        * @param
+        * @param
+        * @return Returns if equal or not
+        */
+        bool operator!=(const BiDirectionalIterator& rhs) const {
+            return current != rhs.current;
+        }
+
+
+
+
+    private:
+        Node* current;
+    };
+
+    using value_type      = T;
+    using size_type       = std::size_t;
+    using reference       = T&;
+    using const_reference = const T&;
+    using iterator        = BiDirectionalIterator;
+    using const_iterator  = BiDirectionalIterator;
+
+    // Constructors
+    LList(): head(nullptr), tail(nullptr), count(0) {}
+
+    LList(const LList& other)
+    {
+        for (const auto& item : other){
+            push_back(item);
+            }
+
+    }
+    // Move constructor
+    LList(LList&& other) noexcept:
+        head(other.head), tail(other.tail), count(other.count){
+
+            other.head = other.tail = nullptr;
+            other.count = 0;
+    }
+
+
+    LList(std::initializer_list<T> ilist)
+         {
+             for (const T& value : ilist){
+                 push_back(value);
+                 }
+
+    }
+    virtual ~LList() {
+        clear();
+    }
+
+    // Assignment
+    /**
+    * @brief Copy Assignment
+    * @param other - A const ref to another list
+    * @param
+    * @param
+    * @return Returns... itself
+    */
+    LList& operator=(const LList& other) {
+        if (this != &other) {
+            clear();
+
+            for(const auto& item: other) {
+                push_back(item);
+                }
+        }
+        return *this;
+    }
+    /**
+     * @brief Move assignment
+     * @param other- A reference to a list that will not be stored in
+     * memory
+     * @param
+     * @param
+     * @return returns itself.
+     */
+    LList& operator=(LList&& other) noexcept {
+        if (this != &other) {
+            clear();
+           other.swap(*this);
+        }
+
+        return *this;
+    }
+
+
+    // Element Access
+    /**
+     * @brief Front Accessor function
+     * @param
+     * @param
+     * @param
+     * @return the data at the front of the list
+     */
+    reference front() {
+
+        if (empty()) {
+            throw std::out_of_range(std::string(__func__) + ": empty list:");
+        }
+
+        return head->data;
+    }
+    /**
+      * @brief Front Accessor function
+      * @param
+      * @param
+      * @param
+      * @return the data at the front of the list
+      */
+    const_reference front() const {
+
+        if (empty()) {
+            throw std::out_of_range(std::string(__func__) + ": empty list:");
+        }
+
+        return head->data;
+    }
+    /**
+     * @brief Back Accessor function
+     * @param
+     * @param
+     * @param
+     * @return the data at the end of the list
+     */
+    reference back() {
+
+        if (empty()) {
+            throw std::out_of_range(std::string(__func__) + ": empty list:");
+        }
+
+        return tail->data;
+    }
+    /**
+    * @brief Back Accessor function
+    * @param
+    * @param
+    * @param
+    * @return the data at the end of the list
+    */
+    const_reference back() const {
+
+        if (empty()) {
+            throw std::out_of_range(std::string(__func__) + ": empty list:");
+        }
+
+        return tail->data;
+    }
+
+    // Iterators
+    /**
+     * @brief Iterator function
+     * @param
+     * @param
+     * @param
+     * @return Returns an iterator to head
+     */
+    iterator begin() {
+        return iterator(head);
+    }
+    /**
+     * @brief Iterator function
+     * @param
+     * @param
+     * @param
+     * @return Returns an iterator to head
+     */
+    const_iterator begin() const {
+
+        return const_iterator(head);
+    }
+    /**
+     * @brief Iterator function
+     * @param
+     * @param
+     * @param
+     * @return Returns an iterator to the tail element.
+     */
+    iterator end() {
+        return iterator(nullptr);
+
+    }
+    /**
+      * @brief Iterator function
+      * @param
+      * @param
+      * @param
+      * @return Returns an iterator to the tail element.
+      */
+    const_iterator end() const  {
+        return const_iterator(nullptr);
+    }
+
+    // Capacity
+    /**
+    * @brief Capcity function
+    * @param
+    * @param
+    * @param
+    * @return returns size
+    */
+    bool empty() const {
+        return count == 0;
+    }
+    /**
+    * @brief Capcity function
+    * @param
+    * @param
+    * @param
+    * @return returns size
+    */
+    size_type size() const {
+        return count;
+    }
+
+    // Modifiers
+    /**
+     * @brief Modifies the list to empty it.
+     * @param
+     * @param
+     * @param
+     * @return Nothing :O
+     */
+    void clear() noexcept {
+        while (!empty()) {
+            pop_front();
+        }
+        while (head != nullptr){
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+
+            }
+
+            tail = nullptr;
+            count = 0;
+    }
+    /**
+     * @brief Mutator function that inserts a value in the selectied pos
+     * @param pos - Iterator to the position in the list
+     * @param value - the value to ebn inputed
+     * @param
+     * @return Returns and iterator to the inserted element.
+     */
+    iterator insert(iterator pos, const T& value) {
+        if(pos.current == head){
+            push_front(value);
+            pos = iterator(head);
+            }else if (pos.current == nullptr){
+                push_back(value);
+                pos = iterator(tail);
+                }else{
+                    Node* current = pos.current;
+                    Node* prev_node = current->prev;
+                    Node* new_node = new Node(value, prev_node, current);
+
+                    prev_node->next = new_node;
+                    current->prev  = new_node;
+
+                    ++count;
+                    pos = iterator(new_node);
+
+                    }
+        return pos;
+    }
+    /**
+     * @brief Mutator functions that erases a value at certain position
+     * @param pos - Iterator to the position
+     * @param
+     * @param
+     * @return Returns the iterator itself.
+     */
+    iterator erase(iterator pos) {
+
+       if(pos.current == head){
+           pop_front();
+           pos = iterator(head);
+           }else if (pos.current == tail){
+               pop_back();
+               pos = iterator(nullptr);
+               }else if(pos.current != nullptr){
+                    Node* temp  = pos.current;
+                    Node* prev_node  = temp->prev;
+                    Node* next_node  = temp->next;
+
+                    prev_node->next = next_node;
+                    next_node->prev = prev_node;
+
+                    delete temp;
+                    --count;
+
+                    pos = iterator(next_node);
+                   }
+
+        return pos;
+    }
+    /**
+     * @brief Adds an element to the end
+     * @param value - value to be added to the back of the list
+     * @param
+     * @param
+     * @return Nada...
+     */
+    void push_back(const T& value) {
+        Node* new_node = new Node(value, tail, nullptr);  //  new node
+
+        if (tail != nullptr) {
+            tail->next = new_node;
+        } else {
+            head = new_node;
+        }
+        tail = new_node;
+        ++count;
+    }
+
+    /**
+     * @brief Removes the last element, throwing if empty
+     * @param
+     * @param
+     * @param
+     * @return Nada
+     */
+    void pop_back() {
+       if (empty()) {
+            throw std::underflow_error(std::string(__func__) + ": empty list");
+        }
+        Node* temp = tail;  // node to delete
+
+        tail = tail->prev;
+
+        if(tail != nullptr){
+            tail->next = nullptr;
+            }else{
+                head = nullptr;
+
+                }
+             delete temp;
+             --count;
+    }
+    /**
+     * @brief Adds an element to the beginning
+     * @param value - The value added
+     * @param
+     * @param
+     * @return Nada
+     */
+    void push_front(const T& value) {
+        Node* new_node = new Node(value, nullptr, head);
+
+        if (head != nullptr){
+            head->prev = new_node;
+            }else{
+                tail = new_node;
+                }
+
+            head = new_node;
+            ++count;
+
+    }
+    /**
+     * @brief Removes the first element, throwing if empty
+     * @param
+     * @param
+     * @param
+     * @return Nada
+     */
+    void pop_front() {
+        if (empty()) {
+            throw std::underflow_error(std::string(__func__) + ": empty list");
+        }
+        Node* temp = head;  // node to delete
+        head = head->next;
+        if(head != nullptr){
+            head->prev = nullptr;
+            }else{
+                tail = nullptr;
+
+                }
+             delete temp;
+             --count;
+    }
+    /**
+     * @brief Swaps the contents of this list with other list
+     * @param other - the other list
+     * @param
+     * @param
+     * @return returns NOTHING.
+     */
+    void swap(LList& other) {
+
+        std::swap(head, other.head);
+        std::swap(tail, other.tail);
+        std::swap(count, other.count);
+
+    }
+
+private:
+    Node*       head{};
+    Node*       tail{};
+    std::size_t count{};
+};  // class LList
+
+
+
+
+
+
+// Non-member functions
+/**
+ * @brief
+ * @param
+ * @param
+ * @param
+ * @return
+ */
+template <class T>
+bool operator==(const LList<T>& lhs, const LList<T>& rhs) {
+    bool are_equal = &lhs == &rhs;
+
+    if(!are_equal){
+        auto it1 = lhs.begin();
+        auto it2 = rhs.begin();
+        are_equal = lhs.size() == rhs.size();
+
+        while(it1 != lhs.end() && are_equal){
+            are_equal = *it1++ == *it2++;
+            }
+        }
+
+    return are_equal;
+}
+/**
+ * @brief
+ * @param
+ * @param
+ * @param
+ * @return
+ */
+template <class T>
+bool operator!=(const LList<T>& lhs, const LList<T>& rhs) {
+    if (!(lhs == rhs)) {
+        return true;
+    }
+
+    return false;
+}
+
+
+
+/* EOF */
+#endif // LLIST_HPP
